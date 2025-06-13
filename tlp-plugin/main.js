@@ -1,4 +1,4 @@
-const { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, createSpan } = require('obsidian');
+const { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } = require('obsidian');
 
 const DEFAULT_SETTINGS = {
     mySetting: 'default'
@@ -95,7 +95,8 @@ class TlpPlugin extends Plugin {
             if (el.getAttribute('data-path') === file.path) {
                 let indicator = el.querySelector('.tlp-indicator');
                 if (!indicator) {
-                    indicator = createSpan({ cls: 'tlp-indicator' });
+                    indicator = document.createElement('span');
+                    indicator.classList.add('tlp-indicator');
                     el.prepend(indicator);
                 }
                 const color = this.getTlpColor(file);

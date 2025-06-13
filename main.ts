@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, createSpan } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -116,11 +116,12 @@ private updateFileIndicator(file: TFile) {
 const navEls = document.querySelectorAll<HTMLElement>('.nav-file-title');
 navEls.forEach(el => {
 if (el.getAttribute('data-path') === file.path) {
-let indicator = el.querySelector<HTMLElement>('.tlp-indicator');
-if (!indicator) {
-indicator = createSpan({cls: 'tlp-indicator'});
-el.prepend(indicator);
-}
+                let indicator = el.querySelector<HTMLElement>('.tlp-indicator');
+                if (!indicator) {
+                indicator = document.createElement('span');
+                indicator.classList.add('tlp-indicator');
+                el.prepend(indicator);
+                }
 const color = this.getTlpColor(file);
 if (color) {
 indicator.style.backgroundColor = color;
