@@ -1,0 +1,17 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+.tlp-indicator {
+width: 0.6em;
+height: 0.6em;
+border-radius: 50%;
+margin-right: 4px;
+display: inline-block;
+pointer-events: none;
+}
