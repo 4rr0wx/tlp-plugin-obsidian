@@ -1,6 +1,7 @@
 # TLP Plugin
 
 This is a plugin for Obsidian (https://obsidian.md).
+The ready-to-use plugin files can be found in the `plugin` directory.
 
 This project uses TypeScript to provide type checking and documentation.
 The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
@@ -54,7 +55,7 @@ Quick starting guide for new plugin devs:
 
 ## Manually installing the plugin
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+The compiled plugin files are provided in the `plugin` folder. To install the plugin into your vault, copy the entire `plugin` directory or its contents (`main.js`, `styles.css`, `manifest.json`) to `VaultFolder/.obsidian/plugins/your-plugin-id/`.
 
 ## Improve code quality with eslint (optional)
 - [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
