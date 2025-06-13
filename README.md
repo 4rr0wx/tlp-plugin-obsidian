@@ -13,6 +13,28 @@ This plugin demonstrates some of the basic functionality the plugin API can do.
 - Registers a global click event and output 'click' to the console.
 - Registers a global interval which logs 'setInterval' to the console.
 
+## Setting a TLP classification
+
+Add a `tlp` or `TLP` key in a file's frontmatter to display a colored indicator next to the file name.
+Valid values are `red`, `amber`, `amber+strict`, `yellow`, `green`, `white`, and `clear`. See the [Traffic Light Protocol](https://de.wikipedia.org/wiki/Traffic_Light_Protocol) for more details.
+
+| Color   | Meaning                                                |
+|---------|--------------------------------------------------------|
+| `red`   | For your eyes only. Do not share outside the meeting.  |
+| `amber` | Share within your organization and its clients.        |
+| `amber+strict` | Share within your organization only.             |
+| `yellow`| Legacy name for `amber`.                               |
+| `green` | Share with partner organizations but not publicly.     |
+| `white` | Free to share broadly. Legacy name for `clear`.        |
+| `clear` | Same as `white`; may be distributed without restriction.|
+
+```markdown
+---
+title: Example Note
+tlp: red
+---
+```
+
 ## First time developing plugins?
 
 Quick starting guide for new plugin devs:
