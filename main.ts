@@ -159,11 +159,11 @@ return tlp ? tlp.toUpperCase() : null;
 private updateBanner(file: TFile | null) {
 const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 if (!view) return;
-let banner = view.containerEl.querySelector<HTMLElement>('.tlp-banner');
+let banner = view.contentEl.querySelector<HTMLElement>('.tlp-banner');
 if (!banner) {
 banner = document.createElement('div');
 banner.classList.add('tlp-banner');
-view.containerEl.prepend(banner);
+view.contentEl.prepend(banner);
 }
 if (!file) {
 banner.style.display = 'none';
