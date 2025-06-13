@@ -26,7 +26,8 @@ export default class TlpPlugin extends Plugin {
 async onload() {
 await this.loadSettings();
 
-this.initializeTlpIndicators();
+    this.initializeTlpIndicators();
+    this.initializeTlpBanner();
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -145,6 +146,49 @@ if (file instanceof TFile) this.updateFileIndicator(file);
 }));
 this.registerEvent(this.app.vault.on('rename', file => {
 if (file instanceof TFile) this.updateFileIndicator(file);
+}));
+}
+
+private getTlpLevel(file: TFile): string | null {
+const cache = this.app.metadataCache.getFileCache(file);
+const fm = cache?.frontmatter;
+const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
+return tlp ? tlp.toUpperCase() : null;
+}
+
+private updateBanner(file: TFile | null) {
+const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+if (!view) return;
+let banner = view.containerEl.querySelector<HTMLElement>('.tlp-banner');
+if (!banner) {
+banner = document.createElement('div');
+banner.classList.add('tlp-banner');
+view.containerEl.prepend(banner);
+}
+if (!file) {
+banner.style.display = 'none';
+return;
+}
+const color = this.getTlpColor(file);
+const level = this.getTlpLevel(file);
+if (color && level) {
+banner.textContent = `TLP: ${level}`;
+banner.setAttribute('data-tlp', level);
+banner.style.backgroundColor = color;
+banner.style.display = 'block';
+} else {
+banner.style.display = 'none';
+}
+}
+
+private initializeTlpBanner() {
+this.app.workspace.onLayoutReady(() => {
+this.updateBanner(this.app.workspace.getActiveFile());
+});
+this.registerEvent(this.app.workspace.on('file-open', file => this.updateBanner(file)));
+this.registerEvent(this.app.metadataCache.on('changed', file => {
+const active = this.app.workspace.getActiveFile();
+if (active && file.path === active.path) this.updateBanner(file);
 }));
 }
 }

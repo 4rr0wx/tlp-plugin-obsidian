@@ -15,3 +15,10 @@ margin-right: 4px;
 display: inline-block;
 pointer-events: none;
 }
+
+.tlp-banner {
+text-align: center;
+font-weight: bold;
+padding: 4px;
+color: white;
+}
