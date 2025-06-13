@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, createSpan } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -7,14 +7,25 @@ interface TlpPluginSettings {
 }
 
 const DEFAULT_SETTINGS: TlpPluginSettings = {
-	mySetting: 'default'
+        mySetting: 'default'
 }
+
+const TLP_COLORS: Record<string, string> = {
+red: '#ff2a2a',
+amber: '#ffbf00',
+yellow: '#ffbf00',
+green: '#2aff2a',
+white: '#ffffff',
+clear: '#ffffff'
+};
 
 export default class TlpPlugin extends Plugin {
 	settings: TlpPluginSettings;
 
-	async onload() {
-		await this.loadSettings();
+async onload() {
+await this.loadSettings();
+
+this.initializeTlpIndicators();
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -86,9 +97,54 @@ export default class TlpPlugin extends Plugin {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+async saveSettings() {
+await this.saveData(this.settings);
+}
+
+private getTlpColor(file: TFile): string | null {
+const cache = this.app.metadataCache.getFileCache(file);
+const fm = cache?.frontmatter;
+const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
+if (tlp) {
+const color = TLP_COLORS[tlp.toLowerCase()];
+if (color) return color;
+}
+return null;
+}
+
+private updateFileIndicator(file: TFile) {
+const navEls = document.querySelectorAll<HTMLElement>('.nav-file-title');
+navEls.forEach(el => {
+if (el.getAttribute('data-path') === file.path) {
+let indicator = el.querySelector<HTMLElement>('.tlp-indicator');
+if (!indicator) {
+indicator = createSpan({cls: 'tlp-indicator'});
+el.prepend(indicator);
+}
+const color = this.getTlpColor(file);
+if (color) {
+indicator.style.backgroundColor = color;
+indicator.style.display = 'inline-block';
+} else {
+indicator.style.display = 'none';
+}
+}
+});
+}
+
+private updateAllFileIndicators() {
+this.app.vault.getMarkdownFiles().forEach(f => this.updateFileIndicator(f));
+}
+
+private initializeTlpIndicators() {
+this.app.workspace.onLayoutReady(() => this.updateAllFileIndicators());
+this.registerEvent(this.app.metadataCache.on('changed', file => {
+if (file instanceof TFile) this.updateFileIndicator(file);
+}));
+this.registerEvent(this.app.vault.on('rename', file => {
+if (file instanceof TFile) this.updateFileIndicator(file);
+}));
+}
 }
 
 class SampleModal extends Modal {
