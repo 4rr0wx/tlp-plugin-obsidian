@@ -8,6 +8,7 @@ The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definiti
 This plugin demonstrates some of the basic functionality the plugin API can do.
 - Adds a ribbon icon, which shows a Notice when clicked.
 - Adds a command "Open Sample Modal" which opens a Modal.
+- Displays a small TLP-colored circle next to each file name.
 - Adds a plugin setting tab to the settings page.
 - Registers a global click event and output 'click' to the console.
 - Registers a global interval which logs 'setInterval' to the console.
