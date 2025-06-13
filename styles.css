@@ -17,9 +17,24 @@ pointer-events: none;
 }
 
 .tlp-banner {
-text-align: center;
-font-weight: bold;
-padding: 4px;
-color: white;
-margin-bottom: 4px;
+    text-align: center;
+    font-weight: bold;
+    padding: 4px;
+    color: white;
+    margin-bottom: 4px;
+}
+
+@keyframes tlp-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tlp-banner.show {
+    animation: tlp-fade-in 0.5s ease;
 }

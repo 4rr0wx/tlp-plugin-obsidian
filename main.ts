@@ -165,20 +165,25 @@ banner = document.createElement('div');
 banner.classList.add('tlp-banner');
 view.contentEl.prepend(banner);
 }
-if (!file) {
-banner.style.display = 'none';
-return;
-}
+        if (!file) {
+            banner.style.display = 'none';
+            banner.classList.remove('show');
+            return;
+        }
 const color = this.getTlpColor(file);
 const level = this.getTlpLevel(file);
-if (color && level) {
-banner.textContent = `TLP: ${level}`;
-banner.setAttribute('data-tlp', level);
-banner.style.backgroundColor = color;
-banner.style.display = 'block';
-} else {
-banner.style.display = 'none';
-}
+        if (color && level) {
+            banner.textContent = `TLP: ${level}`;
+            banner.setAttribute('data-tlp', level);
+            banner.style.backgroundColor = color;
+            banner.style.display = 'block';
+            banner.classList.remove('show');
+            void banner.offsetWidth;
+            banner.classList.add('show');
+        } else {
+            banner.style.display = 'none';
+            banner.classList.remove('show');
+        }
 }
 
 private initializeTlpBanner() {
