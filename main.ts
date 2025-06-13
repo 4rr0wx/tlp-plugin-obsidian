@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS: TlpPluginSettings = {
 const TLP_COLORS: Record<string, string> = {
 red: '#ff2a2a',
 amber: '#ffbf00',
+"amber+strict": '#ffbf00',
 yellow: '#ffbf00',
 green: '#2aff2a',
 white: '#ffffff',
