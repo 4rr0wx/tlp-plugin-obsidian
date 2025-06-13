@@ -166,7 +166,7 @@ banner.classList.add('tlp-banner');
 view.contentEl.prepend(banner);
 }
 if (!file) {
-banner.style.display = 'none';
+banner.classList.remove('visible');
 return;
 }
 const color = this.getTlpColor(file);
@@ -175,9 +175,11 @@ if (color && level) {
 banner.textContent = `TLP: ${level}`;
 banner.setAttribute('data-tlp', level);
 banner.style.backgroundColor = color;
-banner.style.display = 'block';
+banner.classList.remove('visible');
+void banner.offsetWidth;
+banner.classList.add('visible');
 } else {
-banner.style.display = 'none';
+banner.classList.remove('visible');
 }
 }
 
