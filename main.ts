@@ -128,9 +128,10 @@ private getTlpColor(file: TFile): string | null {
 }
 
 private updateFileIndicator(file: TFile) {
-const navEls = document.querySelectorAll<HTMLElement>(
-    '.nav-file-title-content'
-);
+let navEls = document.querySelectorAll<HTMLElement>('.nav-file-title-content');
+if (!navEls.length) {
+    navEls = document.querySelectorAll<HTMLElement>('.nav-file-title');
+}
 navEls.forEach(el => {
 if (el.getAttribute('data-path') === file.path) {
                 let indicator = el.querySelector<HTMLElement>('.tlp-indicator');
