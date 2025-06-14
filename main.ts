@@ -287,5 +287,17 @@ class TlpSettingTab extends PluginSettingTab {
                     this.plugin.settings.levels.push({ level: '', name: '', color: '#ffffff' });
                     this.display();
                 }));
+
+        new Setting(containerEl)
+            .addButton(btn => btn
+                .setButtonText('Reset to Defaults')
+                .setWarning()
+                .onClick(async () => {
+                    this.plugin.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+                    await this.plugin.saveSettings();
+                    this.display();
+                    this.plugin.updateAllFileIndicators();
+                    this.plugin.updateBanner(this.app.workspace.getActiveFile());
+                }));
     }
 }
