@@ -1,23 +1,27 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
+interface TlpLevelSetting {
+    level: string;
+    name: string;
+    color: string;
+}
+
 interface TlpPluginSettings {
-	mySetting: string;
+    levels: TlpLevelSetting[];
 }
 
 const DEFAULT_SETTINGS: TlpPluginSettings = {
-        mySetting: 'default'
-}
-
-const TLP_COLORS: Record<string, string> = {
-red: '#ff2a2a',
-amber: '#ffbf00',
-"amber+strict": '#ffbf00',
-yellow: '#ffbf00',
-green: '#2aff2a',
-white: '#ffffff',
-clear: '#ffffff'
+    levels: [
+        { level: 'red', name: 'TLP:RED', color: '#ff2a2a' },
+        { level: 'amber', name: 'TLP:AMBER', color: '#ffbf00' },
+        { level: 'amber+strict', name: 'TLP:AMBER+STRICT', color: '#ffbf00' },
+        { level: 'yellow', name: 'TLP:YELLOW', color: '#ffbf00' },
+        { level: 'green', name: 'TLP:GREEN', color: '#2aff2a' },
+        { level: 'white', name: 'TLP:WHITE', color: '#ffffff' },
+        { level: 'clear', name: 'TLP:CLEAR', color: '#ffffff' }
+    ]
 };
 
 export default class TlpPlugin extends Plugin {
@@ -29,13 +33,6 @@ await this.loadSettings();
     this.initializeTlpIndicators();
     this.initializeTlpBanner();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
@@ -78,8 +75,8 @@ await this.loadSettings();
 			}
 		});
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+                // This adds a settings tab so the user can configure various aspects of the plugin
+                this.addSettingTab(new TlpSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -100,22 +97,35 @@ await this.loadSettings();
 	}
 
 async saveSettings() {
-await this.saveData(this.settings);
+    await this.saveData(this.settings);
+}
+
+private getLevelConfig(level: string): TlpLevelSetting | undefined {
+    return this.settings.levels.find(l => l.level.toLowerCase() === level.toLowerCase());
+}
+
+private getRawTlp(file: TFile): string | null {
+    const cache = this.app.metadataCache.getFileCache(file);
+    const fm = cache?.frontmatter;
+    const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
+    return tlp ?? null;
 }
 
 private getTlpColor(file: TFile): string | null {
-const cache = this.app.metadataCache.getFileCache(file);
-const fm = cache?.frontmatter;
-const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
-if (tlp) {
-const color = TLP_COLORS[tlp.toLowerCase()];
-if (color) return color;
-}
-return null;
+    const cache = this.app.metadataCache.getFileCache(file);
+    const fm = cache?.frontmatter;
+    const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
+    if (tlp) {
+        const config = this.getLevelConfig(tlp);
+        if (config) return config.color;
+    }
+    return null;
 }
 
 private updateFileIndicator(file: TFile) {
-const navEls = document.querySelectorAll<HTMLElement>('.nav-file-title');
+const navEls = document.querySelectorAll<HTMLElement>(
+    '.nav-file-title-content'
+);
 navEls.forEach(el => {
 if (el.getAttribute('data-path') === file.path) {
                 let indicator = el.querySelector<HTMLElement>('.tlp-indicator');
@@ -135,7 +145,7 @@ indicator.style.display = 'none';
 });
 }
 
-private updateAllFileIndicators() {
+updateAllFileIndicators() {
 this.app.vault.getMarkdownFiles().forEach(f => this.updateFileIndicator(f));
 }
 
@@ -149,14 +159,16 @@ if (file instanceof TFile) this.updateFileIndicator(file);
 }));
 }
 
-private getTlpLevel(file: TFile): string | null {
-const cache = this.app.metadataCache.getFileCache(file);
-const fm = cache?.frontmatter;
-const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
-return tlp ? tlp.toUpperCase() : null;
+private getTlpLevelName(file: TFile): string | null {
+    const cache = this.app.metadataCache.getFileCache(file);
+    const fm = cache?.frontmatter;
+    const tlp = (fm?.tlp ?? fm?.TLP) as string | undefined;
+    if (!tlp) return null;
+    const config = this.getLevelConfig(tlp);
+    return config ? config.name : tlp.toUpperCase();
 }
 
-private updateBanner(file: TFile | null) {
+updateBanner(file: TFile | null) {
 const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 if (!view) return;
 let banner = view.contentEl.querySelector<HTMLElement>('.tlp-banner');
@@ -171,10 +183,11 @@ view.contentEl.prepend(banner);
             return;
         }
 const color = this.getTlpColor(file);
-const level = this.getTlpLevel(file);
-        if (color && level) {
-            banner.textContent = `TLP: ${level}`;
-            banner.setAttribute('data-tlp', level);
+const levelName = this.getTlpLevelName(file);
+const rawLevel = this.getRawTlp(file);
+        if (color && levelName && rawLevel) {
+            banner.textContent = levelName;
+            banner.setAttribute('data-tlp', rawLevel);
             banner.style.backgroundColor = color;
             banner.style.display = 'block';
             banner.classList.remove('show');
@@ -214,28 +227,65 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: TlpPlugin;
+class TlpSettingTab extends PluginSettingTab {
+    plugin: TlpPlugin;
 
-	constructor(app: App, plugin: TlpPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+    constructor(app: App, plugin: TlpPlugin) {
+        super(app, plugin);
+        this.plugin = plugin;
+    }
 
-	display(): void {
-		const {containerEl} = this;
+    display(): void {
+        const { containerEl } = this;
+        containerEl.empty();
 
-		containerEl.empty();
+        containerEl.createEl('h2', { text: 'TLP Levels' });
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+        this.plugin.settings.levels.forEach((level, index) => {
+            const setting = new Setting(containerEl);
+            setting.addText(text => text
+                .setPlaceholder('Level')
+                .setValue(level.level)
+                .onChange(async value => {
+                    level.level = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.updateAllFileIndicators();
+                    this.plugin.updateBanner(this.app.workspace.getActiveFile());
+                }));
+            setting.addText(text => text
+                .setPlaceholder('Display Name')
+                .setValue(level.name)
+                .onChange(async value => {
+                    level.name = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.updateBanner(this.app.workspace.getActiveFile());
+                }));
+            setting.addColorPicker(color => color
+                .setValue(level.color)
+                .onChange(async value => {
+                    level.color = value;
+                    await this.plugin.saveSettings();
+                    this.plugin.updateAllFileIndicators();
+                    this.plugin.updateBanner(this.app.workspace.getActiveFile());
+                }));
+            setting.addExtraButton(btn => btn
+                .setIcon('cross')
+                .setTooltip('Delete')
+                .onClick(async () => {
+                    this.plugin.settings.levels.splice(index, 1);
+                    await this.plugin.saveSettings();
+                    this.display();
+                    this.plugin.updateAllFileIndicators();
+                    this.plugin.updateBanner(this.app.workspace.getActiveFile());
+                }));
+        });
+
+        new Setting(containerEl)
+            .addButton(btn => btn
+                .setButtonText('Add Level')
+                .onClick(() => {
+                    this.plugin.settings.levels.push({ level: '', name: '', color: '#ffffff' });
+                    this.display();
+                }));
+    }
 }
