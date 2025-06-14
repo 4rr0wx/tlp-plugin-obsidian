@@ -17,7 +17,8 @@ This plugin demonstrates some of the basic functionality the plugin API can do.
 ## Setting a TLP classification
 
 Add a `tlp` or `TLP` key in a file's frontmatter to display a colored indicator next to the file name.
-Valid values are `red`, `amber`, `amber+strict`, `yellow`, `green`, `white`, and `clear`. See the [Traffic Light Protocol](https://de.wikipedia.org/wiki/Traffic_Light_Protocol) for more details.
+Values may be specified simply as `red` or prefixed with `TLP:` (e.g. `TLP:RED`).
+Valid options are `red`, `amber`, `amber+strict`, `yellow`, `green`, `white`, and `clear`. See the [Traffic Light Protocol](https://de.wikipedia.org/wiki/Traffic_Light_Protocol) for more details.
 
 | Color   | Meaning                                                |
 |---------|--------------------------------------------------------|
