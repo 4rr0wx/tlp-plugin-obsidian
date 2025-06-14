@@ -100,8 +100,13 @@ async saveSettings() {
     await this.saveData(this.settings);
 }
 
+private normalizeLevel(value: string): string {
+    return value.trim().replace(/^TLP:/i, '');
+}
+
 private getLevelConfig(level: string): TlpLevelSetting | undefined {
-    return this.settings.levels.find(l => l.level.toLowerCase() === level.toLowerCase());
+    const normalized = this.normalizeLevel(level);
+    return this.settings.levels.find(l => l.level.toLowerCase() === normalized.toLowerCase());
 }
 
 private getRawTlp(file: TFile): string | null {
